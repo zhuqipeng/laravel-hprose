@@ -81,7 +81,7 @@ routes/rpc.php
     return 'name: ' . $name;
 });
 
-\LaravelHproseRouter::add('userUpdate', 'App\Controllers\User@update');
+\LaravelHproseRouter::add('userUpdate', 'App\Controllers\User@update', ['model' => \Hprose\ResultMode::Normal]);
 ```
 
 控制器

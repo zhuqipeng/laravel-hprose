@@ -54,25 +54,17 @@ class Router
 
         if (!empty($action['prefix'])) {
             $name = ltrim(rtrim(trim($action['prefix'], '_') . '_' . trim($name, '_'), '_'), '_');
-
-            unset($action['prefix']);
         }
 
         switch ($action['type']) {
             case 'method':
-                list($classAsStr, $method) = explode('@', $action['controller']);
+                list($class, $method) = $this->parseController($action['namespace'], $action['controller']);
 
-                $refClass = new \ReflectionClass(
-                    join('\\', [$action['namespace'], $classAsStr])
-                );
-
-                $class = $refClass->newInstance();
-
-                $this->addMethod($method, $class, $name);
+                $this->addMethod($method, $class, $name, $options);
                 break;
 
             case 'callable':
-                $this->addFunction($action['callable'], $name);
+                $this->addFunction($action['callable'], $name, $options);
                 break;
         }
     }
@@ -139,6 +131,28 @@ class Router
     }
 
     /**
+     * 解析控制器
+     *
+     * @param string|null $namespace
+     * @param string $controller
+     *
+     * @return array
+     */
+    protected function parseController($namespace, string $controller): array
+    {
+        list($classAsStr, $method) = explode('@', $controller);
+
+        $refClass = new \ReflectionClass(
+            join('\\', array_filter([$namespace, $classAsStr]))
+        );
+
+        $class = $refClass->newInstance();
+
+        return [$class, $method];
+    }
+
+
+    /**
      * 格式化前缀
      *
      * @param array $new
@@ -160,33 +174,36 @@ class Router
      *
      * @param callable $action
      * @param string $alias
+     * @param array $options
      *
      * @return void
      */
-    private function addFunction($action, $alias)
+    private function addFunction(callable $action, string $alias, array $options)
     {
         $this->methods[] = $alias;
 
-        app('hprose.socket_server')->addFunction($action, $alias);
+        app('hprose.socket_server')->addFunction($action, $alias, $options);
     }
 
     /**
      * 添加类方法
      *
      * @param string $method
-     * @param string $class
+     * @param object $class
      * @param string $alias
+     * @param array $alias
      *
      * @return void
      */
-    private function addMethod($method, $class, $alias)
+    private function addMethod(string $method, $class, string $alias, array $options)
     {
         $this->methods[] = $alias;
 
         app('hprose.socket_server')->addMethod(
             $method,
             $class,
-            $alias
+            $alias,
+            $options
         );
     }
 }
