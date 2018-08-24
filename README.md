@@ -1,4 +1,4 @@
-# laravel-hprose
+# Laravel-hprose
 
 基于 [hprose/hprose-php](https://github.com/hprose/hprose-php/wiki) 开发的Laravel扩展
 
@@ -9,7 +9,7 @@ Laravel>=5.3
 
 ## 安装
 ```shell
-composer require "zhuqipeng/laravel-hprose:~1.0.0"
+composer require "zhuqipeng/laravel-hprose:~1.0-alpha"
 ```
 或者编辑composer.json
 ```json
