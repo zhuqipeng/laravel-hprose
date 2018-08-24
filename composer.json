@@ -1,0 +1,30 @@
+{
+    "name": "zhuqipeng/laravel-hprose",
+    "description": "Hprose for Laravel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "朱其鹏",
+            "email": "28942998@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "hprose/hprose": "v2.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zhuqipeng\\LaravelHprose\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zhuqipeng\\LaravelHprose\\ServiceProvider"
+            ],
+            "aliases": {
+                "LaravelHproseRouter": "Zhuqipeng\\LaravelHprose\\Facades\\Routing\\Router"
+            }
+        }
+    }
+}
