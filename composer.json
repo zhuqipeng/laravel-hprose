@@ -1,6 +1,7 @@
 {
     "name": "zhuqipeng/laravel-hprose",
     "description": "Hprose for Laravel",
+    "keywords": ["hprose", "laravel"],
     "license": "MIT",
     "authors": [
         {
@@ -23,7 +24,7 @@
                 "Zhuqipeng\\LaravelHprose\\ServiceProvider"
             ],
             "aliases": {
-                "LaravelHproseRouter": "Zhuqipeng\\LaravelHprose\\Facades\\Routing\\Router"
+                "LaravelHproseRouter": "Zhuqipeng\\LaravelHprose\\Facades\\Router"
             }
         }
     }

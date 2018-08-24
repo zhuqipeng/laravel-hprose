@@ -9,12 +9,12 @@ Laravel>=5.3
 
 ## 安装
 ```shell
-composer require "zhuqipeng/laravel-hprose:~1.0-alpha"
+composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
 ```
 或者编辑composer.json
 ```json
 "require": {
-    "zhuqipeng/laravel-hprose": "v1.0.*"
+    "zhuqipeng/laravel-hprose": "v1.0-alpha"
 }
 ```
 
@@ -104,7 +104,7 @@ $client->userUpdate('zhuqipeng');
 ```
 
 路由组
-```
+```php
 \LaravelHproseRouter::group(array $attributes, callable $callback);
 ```
 - array $attributes 属性 ['namespace' => '', 'prefix' => '']
