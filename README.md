@@ -1,6 +1,6 @@
 # laravel-hprose
-
-基于 [hprose/hprose-php](https://github.com/hprose/hprose-php/wiki) 开发的Laravel扩展
+
+基于 [hprose/hprose-php](https://github.com/hprose/hprose-php/wiki) 开发的Laravel扩展
 
 ## 版本要求
 ```
@@ -14,8 +14,6 @@ composer require "zhuqipeng/laravel-hprose:~1.0.0"
 或者编辑composer.json
 ```json
 "require": {
-    ...
-
     "zhuqipeng/laravel-hprose": "v1.0.*"
 }
 ```
@@ -38,7 +36,7 @@ composer require "zhuqipeng/laravel-hprose:~1.0.0"
 ```
 2. 配置.env文件
 
-监听地址列表，字符串json格式数组
+监听地址列表，字符串json格式数组
 ```
 HPROSE_URIS=["tcp://0.0.0.0:1314"]
 ```
@@ -60,7 +58,7 @@ php artisan vendor:publish --provider="Zhuqipeng\LaravelHprose\ServiceProvider"
 ## 使用
 
 ### 路由
->和 `laravel` 路由的用法相似，基于 [dingo/api](https://github.com/dingo/api) 的路由代码上做了简单修改
+>和 `laravel` 路由的用法相似，基于 [dingo/api](https://github.com/dingo/api) 的路由代码上做了简单修改
 
 路由文件
 ```
