@@ -99,10 +99,16 @@ class ServiceProvider extends LaravelServiceProvider
         $this->app->singleton('hprose.socket_server', function ($app) {
             $server = new \Zhuqipeng\LaravelHprose\HproseSocketServer();
 
+            $uris = config('hprose.uris');
+
+            if (!is_array($uris)) {
+                throw new \Exception("配置监听地址格式有误", 500);
+            }
+
             // 添加监听地址
             array_map(function ($uri) use ($server) {
                 $server->addListener($uri);
-            }, config('hprose.uris'));
+            }, $uris);
 
             return $server;
         });
