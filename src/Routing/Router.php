@@ -6,6 +6,8 @@ class Router
 {
     protected $groupStack = [];
 
+    protected $methods = [];
+
     protected $prefix = '';
 
     /**
