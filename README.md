@@ -21,18 +21,18 @@ composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
 ## 配置
 1. 在 config/app.php 注册 ServiceProvider 和 Facade (Laravel 5.5 无需手动注册)
     ```php
-  'providers' => [
-      // ...
+    'providers' => [
+        // ...
 
-      Zhuqipeng\LaravelHprose\ServiceProvider::class,
-  ]
+        Zhuqipeng\LaravelHprose\ServiceProvider::class,
+    ]
     ```
     ```php
-  'aliases' => [
-      // ...
+    'aliases' => [
+        // ...
 
-      'LaravelHproseMethodManage' => Zhuqipeng\LaravelHprose\Facades\HproseMethodManage::class,
-  ]
+        'LaravelHproseMethodManage' => Zhuqipeng\LaravelHprose\Facades\HproseMethodManage::class,
+    ]
     ```
 2. 配置.env文件
 
