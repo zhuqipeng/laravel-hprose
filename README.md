@@ -1,6 +1,6 @@
 # Laravel-hprose
 
-基于 [hprose/hprose-php](https://github.com/hprose/hprose-php/wiki) 开发的Laravel扩展
+基于 [hprose/hprose-php](https://github.com/hprose/hprose-php/wiki) 开发的Laravel扩展：[laravel-hprose](https://github.com/zhuqipeng/laravel-hprose)
 
 ## 版本要求
 ```
@@ -20,40 +20,40 @@ composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
 
 ## 配置
 1. 在 config/app.php 注册 ServiceProvider 和 Facade (Laravel 5.5 无需手动注册)
-```php
-'providers' => [
-    // ...
+    ```php
+  'providers' => [
+      // ...
 
-    Zhuqipeng\LaravelHprose\ServiceProvider::class,
-]
-```
-```php
-'aliases' => [
-    // ...
+      Zhuqipeng\LaravelHprose\ServiceProvider::class,
+  ]
+    ```
+    ```php
+  'aliases' => [
+      // ...
 
-    'LaravelHproseMethodManage' => Zhuqipeng\LaravelHprose\Facades\HproseMethodManage::class,
-]
-```
+      'LaravelHproseMethodManage' => Zhuqipeng\LaravelHprose\Facades\HproseMethodManage::class,
+  ]
+    ```
 2. 配置.env文件
 
-监听地址列表，字符串json格式数组
-```
-HPROSE_URIS=["tcp://0.0.0.0:1314"]
-```
-是否启用demo方法，true开启 false关闭，开启后将自动对外发布一个远程调用方法 `demo`
+  监听地址列表，字符串json格式数组
+    ```
+    HPROSE_URIS=["tcp://0.0.0.0:1314"]
+    ```
+    是否启用demo方法，true开启 false关闭，开启后将自动对外发布一个远程调用方法 `demo`
 
-客户端可调用：$client->demo()
-```
-HPROSE_DEMO=true // true or false
-```
+    客户端可调用：$client->demo()
+    ```
+    HPROSE_DEMO=true // true or false
+    ```
 
 3. 创建`配置`和`路由`文件：
-```shell
-php artisan vendor:publish --provider="Zhuqipeng\LaravelHprose\ServiceProvider"
-```
->应用根目录下的`config`目录下会自动生成新文件`hprose.php`
->
->应用根目录下的`routes`目录下会自动生成新文件`rpc.php`
+    ```shell
+    php artisan vendor:publish --provider="Zhuqipeng\LaravelHprose\ServiceProvider"
+    ```
+    >应用根目录下的`config`目录下会自动生成新文件`hprose.php`
+    >
+    >应用根目录下的`routes`目录下会自动生成新文件`rpc.php`
 
 ## 使用
 
@@ -144,7 +144,8 @@ $client->user_getByName('zhuqipeng');
 $client->user_update('zhuqipeng');
 ```
 
-启动服务
+### 启动服务
+
 ```shell
 php artisan hprose:socket_server
 ```
