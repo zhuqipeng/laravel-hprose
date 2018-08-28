@@ -39,13 +39,17 @@ class ServiceProvider extends LaravelServiceProvider
      */
     protected function loadRoute()
     {
-        $routeFilePath = base_path('routes/rpc.php');
+        if (str_is('5.2.*', app()::VERSION)) {
+            $routeFilePath = base_path('app/Http/rpc.php');
+        } else {
+            $routeFilePath = base_path('routes/rpc.php');
+        }
 
         if (file_exists($routeFilePath)) {
-            $this->loadRoutesFrom($routeFilePath);
+            require $routeFilePath;
         } else {
             if (config('hprose.demo')) {
-                $this->loadRoutesFrom(__DIR__ . '/route.php');
+                require __DIR__ . '/route.php';
             }
         }
     }
@@ -86,7 +90,13 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $source = realpath(__DIR__ . '/route.php');
 
-        $this->publishes([$source => base_path('routes/rpc.php')]);
+        if (str_is('5.2.*', app()::VERSION)) {
+            $targetPath = base_path('app/Http/rpc.php');
+        } else {
+            $targetPath = base_path('routes/rpc.php');
+        }
+
+        $this->publishes([$source => $targetPath]);
     }
 
     /**
