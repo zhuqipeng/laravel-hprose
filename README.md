@@ -35,13 +35,12 @@ composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
     ]
     ```
 2. 配置.env文件
-
-  监听地址列表，字符串json格式数组
+    监听地址列表，字符串json格式数组
     ```
     HPROSE_URIS=["tcp://0.0.0.0:1314"]
     ```
-    是否启用demo方法，true开启 false关闭，开启后将自动对外发布一个远程调用方法 `demo`
 
+    是否启用demo方法，true开启 false关闭，开启后将自动对外发布一个远程调用方法 `demo`
     客户端可调用：$client->demo()
     ```
     HPROSE_DEMO=true // true or false
