@@ -3,7 +3,7 @@
 namespace Zhuqipeng\LaravelHprose;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
-use LaravelHproseMethodManage;
+use LaravelHproseRouter;
 
 class ServiceProvider extends LaravelServiceProvider
 {
@@ -16,6 +16,7 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $this->loadRoute();
         $this->loadCommands();
+        $this->bootHproseParameterMiddleware();
     }
 
     /**
@@ -39,7 +40,7 @@ class ServiceProvider extends LaravelServiceProvider
      */
     protected function loadRoute()
     {
-        if (str_is('5.2.*', app()::VERSION)) {
+        if (str_is('5.2.*', $this->app::VERSION)) {
             $routeFilePath = base_path('app/Http/rpc.php');
         } else {
             $routeFilePath = base_path('routes/rpc.php');
@@ -55,6 +56,28 @@ class ServiceProvider extends LaravelServiceProvider
     }
 
     /**
+     * 注册Hprose参数验证器
+     *
+     * @return void
+     */
+    protected function bootHproseParameterMiddleware()
+    {
+        $this->app['hprose.socket_server']->addInvokeHandler(
+            function ($name, array &$args, \stdClass $context, \Closure $next) {
+                $error = app('hprose.parameter')->validationFails($name, $args);
+
+                if (!is_null($error)) {
+                    return $error;
+                }
+
+                $result = $next($name, $args, $context);
+
+                return $result;
+            }
+        );
+    }
+
+    /**
      * Register any application services.
      *
      * @return void
@@ -65,6 +88,7 @@ class ServiceProvider extends LaravelServiceProvider
         $this->setupRoute();
         $this->registerHproseSocketServer();
         $this->registerHproseMethodManage();
+        $this->registerHproseParameter();
     }
 
     /**
@@ -90,7 +114,7 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $source = realpath(__DIR__ . '/route.php');
 
-        if (str_is('5.2.*', app()::VERSION)) {
+        if (str_is('5.2.*', $this->app::VERSION)) {
             $targetPath = base_path('app/Http/rpc.php');
         } else {
             $targetPath = base_path('routes/rpc.php');
@@ -109,10 +133,14 @@ class ServiceProvider extends LaravelServiceProvider
         $this->app->singleton('hprose.socket_server', function ($app) {
             $server = new \Zhuqipeng\LaravelHprose\HproseSocketServer();
 
+            $server->onSendError = function ($error, \stdClass $context) {
+                \Log::info($error);
+            };
+
             $uris = config('hprose.uris');
 
             if (!is_array($uris)) {
-                throw new \Exception("配置监听地址格式有误", 500);
+                throw new \Exception('配置监听地址格式有误', 500);
             }
 
             // 添加监听地址
@@ -133,6 +161,18 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $this->app->singleton('hprose.router', function ($app) {
             return new \Zhuqipeng\LaravelHprose\Routing\Router;
+        });
+    }
+
+    /**
+     * 注册参数验证器管理
+     *
+     * @return void
+     */
+    private function registerHproseParameter()
+    {
+        $this->app->singleton('hprose.parameter', function ($app) {
+            return new \Zhuqipeng\LaravelHprose\Parameters\Manage;
         });
     }
 }

@@ -12,4 +12,8 @@ return [
      * $client->demo()
      */
     'demo' => env('HPROSE_DEMO'),
+
+    'parameter' => 'App\\Controllers\\Parameters',
+
+    'controller' => 'App\\Controllers',
 ];

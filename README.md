@@ -35,6 +35,7 @@ composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
     ]
     ```
 2. 配置.env文件
+
     监听地址列表，字符串json格式数组
     ```
     HPROSE_URIS=["tcp://0.0.0.0:1314"]
@@ -53,6 +54,28 @@ composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
     >应用根目录下的`config`目录下会自动生成新文件`hprose.php`
     >
     >应用根目录下的`routes`目录下会自动生成新文件`rpc.php`
+
+4. 配置说明，`config/hprose.php`
+
+    监听地址列表，字符串json格式数组
+    ```php
+    'uris' => json_decode(env('HPROSE_URIS', '["tcp://0.0.0.0:1314"]')),
+    ```
+
+    是否启用demo方法，true开启 false关闭，开启后将自动对外发布一个远程调用方法 `demo`
+    ```php
+    'demo' => env('HPROSE_DEMO'),
+    ```
+
+    参数验证器命名空间
+    ```php
+    'parameter' => 'App\\Controllers\\Parameters'
+    ```
+
+    控制器命名空间
+    ```php
+    'controller' => 'App\\Controllers',
+    ```
 
 ## 使用
 
@@ -96,9 +119,81 @@ class User
 }
 ```
 
+使用参数验证器
+
+在 `add` 方法后面追加链式调用 `parameter` 方法
+```php
+\LaravelHproseRouter::add('userStore', 'User@store')->parameter('UserStore');
+```
+参数验证器
+
+和 `laravel` 的表单验证规则一致，但必须继承 `Zhuqipeng\LaravelHprose\Parameters\Base`
+```php
+<?php
+
+namespace App\Controllers\Parameters;
+
+use Zhuqipeng\LaravelHprose\Parameters\Base;
+
+class UserStore extends Base
+{
+    public function rules()
+    {
+        return [
+            'name'  => 'required',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'required' => ':attribute 参数是必传的'
+        ];
+    }
+}
+```
+自定义参数验证错误响应格式
+
+默认会抛出异常 `\Zhuqipeng\LaravelHprose\Exceptions\BadRequestParameterException`
+
+如果需要自定义异常，或者响应json格式，在验证器里重写 `formatErrors` 方法即可
+```php
+<?php
+
+namespace App\Controllers\Parameters;
+
+use Zhuqipeng\LaravelHprose\Parameters\Base;
+
+class UserStore extends Base
+{
+    public function rules()
+    {
+        return [
+            'name'  => 'required',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'required' => ':attribute 参数是必传的'
+        ];
+    }
+
+    public function formatErrors(\Illuminate\Support\MessageBag $errorMessage)
+    {
+        return [
+            'status_code'   => 400,
+            'message'       => $errorMessage->first(),
+        ];
+    }
+}
+```
+
 客户端调用
 ```php
 $client->getUserByName('zhuqipeng');
+$client->userStore('zhuqipeng');
 $client->userUpdate('zhuqipeng');
 ```
 

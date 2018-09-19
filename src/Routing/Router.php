@@ -10,6 +10,8 @@ class Router
 
     protected $prefix = '';
 
+    protected $lastMethodName = '';
+
     /**
      * 创建一组方法
      *
@@ -42,7 +44,7 @@ class Router
      *  是一个关联数组，它里面包含了一些对该服务函数的特殊设置，详情参考hprose-php文档介绍
      *  https://github.com/hprose/hprose-php/wiki/06-Hprose-%E6%9C%8D%E5%8A%A1%E5%99%A8#addfunction-%E6%96%B9%E6%B3%95
      *
-     * @return void
+     * @return $this
      */
     public function add(string $name, $action, array $options = [])
     {
@@ -63,11 +65,34 @@ class Router
                 list($class, $method) = $this->parseController($action['namespace'], $action['controller']);
 
                 $this->addMethod($method, $class, $name, $options);
+                $this->mapRefMethodParameterName($class, $method, $name);
                 break;
 
             case 'callable':
                 $this->addFunction($action['callable'], $name, $options);
+                $this->mapRefFuncParameterName($action['callable'], $name);
                 break;
+        }
+
+        $this->appendMethod($name);
+        $this->setLastMethodName($name);
+
+        return $this;
+    }
+
+    /**
+     * 添加参数验证器
+     *
+     * @param string $value
+     *
+     * @return void
+     */
+    public function parameter(string $value)
+    {
+        if ($value) {
+            $c = join('\\', [config('hprose.parameter'), $value]);
+
+            app('hprose.parameter')->mapParameter($this->getLastMethodName(), (new $c));
         }
     }
 
@@ -82,13 +107,35 @@ class Router
     }
 
     /**
+     * 追加至已添加方法列表
+     *
+     * @param string $methodName
+     *
+     * @return void
+     */
+    private function appendMethod(string $methodName)
+    {
+        $this->methods[] = $methodName;
+    }
+
+    private function setLastMethodName(string $methodName)
+    {
+        $this->lastMethodName = $methodName;
+    }
+
+    private function getLastMethodName()
+    {
+        return $this->lastMethodName;
+    }
+
+    /**
      * 合并最后一组属性
      *
      * @param array $attributes
      *
      * @return array
      */
-    protected function mergeLastGroupAttributes(array $attributes)
+    private function mergeLastGroupAttributes(array $attributes)
     {
         if (empty($this->groupStack)) {
             return $this->mergeGroup($attributes, []);
@@ -105,7 +152,7 @@ class Router
      *
      * @return array
      */
-    protected function mergeGroup(array $new, array $old)
+    private function mergeGroup(array $new, array $old)
     {
         $new['namespace'] = $this->formatNamespace($new, $old);
         $new['prefix'] = $this->formatPrefix($new, $old);
@@ -121,7 +168,7 @@ class Router
      *
      * @return string
      */
-    protected function formatNamespace(array $new, array $old)
+    private function formatNamespace(array $new, array $old)
     {
         if (isset($new['namespace']) && isset($old['namespace'])) {
             return trim($old['namespace'], '\\') . '\\' . trim($new['namespace'], '\\');
@@ -140,15 +187,13 @@ class Router
      *
      * @return array
      */
-    protected function parseController($namespace, string $controller): array
+    private function parseController($namespace, string $controller): array
     {
+        $namespace = $namespace ? $namespace : config('hprose.controller');
+
         list($classAsStr, $method) = explode('@', $controller);
 
-        $refClass = new \ReflectionClass(
-            join('\\', array_filter([$namespace, $classAsStr]))
-        );
-
-        $class = $refClass->newInstance();
+        $class = resolve(join('\\', array_filter([$namespace, $classAsStr])));
 
         return [$class, $method];
     }
@@ -162,7 +207,7 @@ class Router
      *
      * @return string
      */
-    protected function formatPrefix(array $new, array $old)
+    private function formatPrefix(array $new, array $old)
     {
         if (isset($new['prefix'])) {
             return trim(array_get($old, 'prefix'), '_') . '_' . trim($new['prefix'], '_');
@@ -182,8 +227,6 @@ class Router
      */
     private function addFunction(callable $action, string $alias, array $options)
     {
-        $this->methods[] = $alias;
-
         app('hprose.socket_server')->addFunction($action, $alias, $options);
     }
 
@@ -199,13 +242,39 @@ class Router
      */
     private function addMethod(string $method, $class, string $alias, array $options)
     {
-        $this->methods[] = $alias;
+        app('hprose.socket_server')->addMethod($method, $class, $alias, $options);
+    }
 
-        app('hprose.socket_server')->addMethod(
-            $method,
-            $class,
-            $alias,
-            $options
-        );
+    /**
+     * 关联函数或方法的参数名
+     *
+     * @param object $class
+     * @param string $method
+     * @param string $alias
+     * @return void
+     */
+    private function mapRefMethodParameterName($class, string $method, string $alias)
+    {
+        $ref = new \ReflectionMethod($class, $method);
+
+        app('hprose.parameter')->mapParameterName($alias, array_map(function ($parameter) {
+            return $parameter->name;
+        }, $ref->getParameters()));
+    }
+
+    /**
+     * 关联函数或方法的参数名
+     *
+     * @param callable $callback
+     * @param string $alias
+     * @return void
+     */
+    private function mapRefFuncParameterName(callable $callback, string $alias)
+    {
+        $ref = new \ReflectionFunction($callback);
+
+        app('hprose.parameter')->mapParameterName($alias, array_map(function ($parameter) {
+            return $parameter->name;
+        }, $ref->getParameters()));
     }
 }
