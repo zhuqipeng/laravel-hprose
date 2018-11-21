@@ -9,12 +9,12 @@ Laravel>=5.2
 
 ## 安装
 ```shell
-composer require "zhuqipeng/laravel-hprose:v1.0-alpha"
+composer require "zhuqipeng/laravel-hprose:v1.0.0"
 ```
 或者编辑composer.json
 ```json
 "require": {
-    "zhuqipeng/laravel-hprose": "v1.0-alpha"
+    "zhuqipeng/laravel-hprose": "v1.0.0"
 }
 ```
 
