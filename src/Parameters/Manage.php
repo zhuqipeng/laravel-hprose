@@ -50,6 +50,8 @@ class Manage
             $parameterNames = array_get($map, 'parameterNames', []);
             $validationData = $this->combine($parameterNames, $args);
             if ($parameter = array_get($map, 'parameter')) {
+                $this->setParameterAttribute($parameter, $validationData);
+
                 $validate = \Validator::make($validationData, $parameter->rules(), $parameter->messages());
                 if ($validate->fails()) {
                     $errors = $parameter->formatErrors($validate->errors());
@@ -58,6 +60,21 @@ class Manage
         }
 
         return $errors;
+    }
+
+    /**
+     * 设置参数器属性，验证参数名作为属性名，验证参数值作为属性值
+     *
+     * @param Base $parameter
+     * @param array $validationData
+     *
+     * @return void
+     */
+    private function setParameterAttribute(Base $parameter, array $validationData)
+    {
+        foreach ($validationData as $key => $value) {
+            $parameter->{$key} = $value;
+        }
     }
 
     /**
