@@ -14,9 +14,11 @@ class ServiceProvider extends LaravelServiceProvider
      */
     public function boot()
     {
-        $this->loadRoute();
-        $this->loadCommands();
-        $this->bootHproseParameterMiddleware();
+        if ($this->app->runningInConsole()) {
+            $this->loadRoute();
+            $this->loadCommands();
+            $this->bootHproseParameterMiddleware();
+        }
     }
 
     /**
@@ -89,19 +91,22 @@ class ServiceProvider extends LaravelServiceProvider
      */
     public function register()
     {
-        $this->setupConfig();
-        $this->setupRoute();
 
-        // 注册服务
-        if (in_array('hprose.socket_server', config('hprose.enable_servers'))) {
-            $this->registerHproseSocketServer();
-        }
-        if (in_array('hprose.swoole_http_server', config('hprose.enable_servers'))) {
-            $this->registerHproseSwooleHttpServer();
-        }
+        if ($this->app->runningInConsole()) {
+            $this->setupConfig();
+            $this->setupRoute();
 
-        $this->registerHproseMethodManage();
-        $this->registerHproseParameter();
+            // 注册服务
+            if (in_array('hprose.socket_server', config('hprose.enable_servers'))) {
+                $this->registerHproseSocketServer();
+            }
+            if (in_array('hprose.swoole_http_server', config('hprose.enable_servers'))) {
+                $this->registerHproseSwooleHttpServer();
+            }
+
+            $this->registerHproseMethodManage();
+            $this->registerHproseParameter();
+        }
     }
 
     /**
