@@ -1,11 +1,23 @@
 <?php
 
 return [
-    /**
-     * 监听地址列表
-     * 字符串json格式数组
-     */
-    'uris' => json_decode(env('HPROSE_URIS', '["tcp://0.0.0.0:1314"]')),
+    'tcp_uris' => (function () {
+        $uris = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $uri = env(sprintf('HPROSE_TCP_URI%s', $i));
+            $uri and array_push($uris, $uri);
+        }
+        return $uris;
+    })(),
+
+    'http_uri' => env('HPROSE_HTTP_URI', 'http://0.0.0.0:8086'),
+
+    'enable_servers' => array_keys(array_filter([
+        'hprose.socket_server' => env('ENABLE_SOCKET_SERVER', true),
+        'hprose.swoole_http_server' => env('ENABLE_SWOOLE_HTTP_SERVER', true),
+    ], function ($v, $k) {
+        return $v;
+    }, ARRAY_FILTER_USE_BOTH)),
 
     /**
      * true开启 false关闭，开启后将自动对外发布一个远程调用方法 `demo`

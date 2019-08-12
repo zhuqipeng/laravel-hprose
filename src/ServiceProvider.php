@@ -29,6 +29,7 @@ class ServiceProvider extends LaravelServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Commands\HproseSocket::class,
+                Commands\HproseSwooleHttp::class,
             ]);
         }
     }
@@ -56,25 +57,29 @@ class ServiceProvider extends LaravelServiceProvider
     }
 
     /**
-     * 注册Hprose参数验证器
+     * 注册 Hprose 参数验证器
      *
      * @return void
      */
     protected function bootHproseParameterMiddleware()
     {
-        $this->app['hprose.socket_server']->addInvokeHandler(
-            function ($name, array &$args, \stdClass $context, \Closure $next) {
-                $error = app('hprose.parameter')->validationFails($name, $args);
+        $servers = config('hprose.enable_servers');
 
-                if (!is_null($error)) {
-                    return $error;
+        foreach ($servers as $server) {
+            $this->app[$server]->addInvokeHandler(
+                function ($name, array &$args, \stdClass $context, \Closure $next) {
+                    $error = app('hprose.parameter')->validationFails($name, $args);
+
+                    if (!is_null($error)) {
+                        return $error;
+                    }
+
+                    $result = $next($name, $args, $context);
+
+                    return $result;
                 }
-
-                $result = $next($name, $args, $context);
-
-                return $result;
-            }
-        );
+            );
+        }
     }
 
     /**
@@ -86,7 +91,15 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $this->setupConfig();
         $this->setupRoute();
-        $this->registerHproseSocketServer();
+
+        // 注册服务
+        if (in_array('hprose.socket_server', config('hprose.enable_servers'))) {
+            $this->registerHproseSocketServer();
+        }
+        if (in_array('hprose.swoole_http_server', config('hprose.enable_servers'))) {
+            $this->registerHproseSwooleHttpServer();
+        }
+
         $this->registerHproseMethodManage();
         $this->registerHproseParameter();
     }
@@ -124,7 +137,7 @@ class ServiceProvider extends LaravelServiceProvider
     }
 
     /**
-     * 注册HproseSocketServer
+     * 注册 HproseSocketServer
      *
      * @return void
      */
@@ -137,7 +150,7 @@ class ServiceProvider extends LaravelServiceProvider
                 \Log::info($error);
             };
 
-            $uris = config('hprose.uris');
+            $uris = config('hprose.tcp_uris');
 
             if (!is_array($uris)) {
                 throw new \Exception('配置监听地址格式有误', 500);
@@ -153,7 +166,27 @@ class ServiceProvider extends LaravelServiceProvider
     }
 
     /**
-     * 注册HproseMenthodManage
+     * 注册 HproseSwooleHttpServer
+     *
+     * @return void
+     */
+    private function registerHproseSwooleHttpServer()
+    {
+        $this->app->singleton('hprose.swoole_http_server', function ($app) {
+            $uri = config('hprose.http_uri');
+
+            $server = new \Zhuqipeng\LaravelHprose\HproseSwooleHttpServer($uri);
+
+            $server->onSendError = function ($error, \stdClass $context) {
+                \Log::info($error);
+            };
+
+            return $server;
+        });
+    }
+
+    /**
+     * 注册 HproseMenthodManage
      *
      * @return void
      */

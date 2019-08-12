@@ -21,7 +21,7 @@ class Base extends Command
      *
      * @return void
      */
-    protected function outputInfo()
+    protected function outputInfo($scheme = 'tcp')
     {
         $this->comment('版本:');
         $this->output->writeln(sprintf(' - Laravel=<info>%s</>', app()::VERSION), $this->parseVerbosity(null));
@@ -29,8 +29,12 @@ class Base extends Command
         $this->output->newLine();
 
         $this->comment('监听:');
-        foreach (config('hprose.uris') as $uri) {
-            $this->line(sprintf(' - <info>%s</>', $uri));
+        if ($scheme == 'tcp') {
+            foreach (config('hprose.tcp_uris') as $uri) {
+                $this->line(sprintf(' - <info>%s</>', $uri));
+            }
+        } elseif ($scheme == 'http') {
+            $this->line(sprintf(' - <info>%s</>', config('hprose.http_uri')));
         }
         $this->output->newLine();
 

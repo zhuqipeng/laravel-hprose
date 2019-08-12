@@ -227,7 +227,9 @@ class Router
      */
     private function addFunction(callable $action, string $alias, array $options)
     {
-        app('hprose.socket_server')->addFunction($action, $alias, $options);
+        foreach (config('hprose.enable_servers') as $server) {
+            app($server)->addFunction($action, $alias, $options);
+        }
     }
 
     /**
@@ -242,7 +244,9 @@ class Router
      */
     private function addMethod(string $method, $class, string $alias, array $options)
     {
-        app('hprose.socket_server')->addMethod($method, $class, $alias, $options);
+        foreach (config('hprose.enable_servers') as $server) {
+            app($server)->addMethod($method, $class, $alias, $options);
+        }
     }
 
     /**

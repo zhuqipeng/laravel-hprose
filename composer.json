@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "hprose/hprose": "v2.0.*"
+        "hprose/hprose": "v2.0.*",
+        "hprose/hprose-swoole": "dev-master"
     },
     "autoload": {
         "psr-4": {

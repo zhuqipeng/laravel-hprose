@@ -2,21 +2,21 @@
 
 namespace Zhuqipeng\LaravelHprose\Commands;
 
-class HproseSocket extends Base
+class HproseSwooleHttp extends Base
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'hprose:socket_server';
+    protected $signature = 'hprose:swoole_http_server';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'socket 服务';
+    protected $description = 'swoole_http 服务';
 
     /**
      * Create a new command instance.
@@ -35,9 +35,9 @@ class HproseSocket extends Base
      */
     public function handle()
     {
-        $this->outputInfo('tcp');
+        $this->outputInfo('http');
 
-        $server = app('hprose.socket_server');
+        $server = app('hprose.swoole_http_server');
 
         $server->start();
     }
