@@ -16,10 +16,6 @@ class HproseSwooleHttpServer extends \Hprose\Swoole\Http\Service
 
     public function handle($request = null, $response = null)
     {
-        $response->header('Access-Control-Allow-Origin', 'http://chongzhibao.biqu.tv');
-        $response->header('Access-Control-Allow-Methods', '*');
-        $response->header('Access-Control-Allow-Credentials', 'true');
-
         return parent::handle($request, $response);
     }
 
